@@ -1,3 +1,5 @@
+# Helpers for loading and transforming the COVID-19 data provided the John Hopkins University
+
 import pandas as pd
 
 def get_jhu_data(
@@ -28,7 +30,7 @@ def aggregte_jhu_by_state(confirmed, recovered, deaths):
     deaths.index = pd.DatetimeIndex(deaths.index, name='Date')
     
     infected = (confirmed - recovered - deaths)
-    infection_rate = (infected.shift(-1) / infected)
+    infection_rate = (infected / infected.shift(1))
     
     return pd.concat({
         'confirmed': confirmed, 'recovered': recovered, 'deaths': deaths, 'infected': infected, 'infection_rate': infection_rate
