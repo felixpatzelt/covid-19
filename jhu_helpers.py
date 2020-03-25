@@ -4,9 +4,9 @@ import pandas as pd
 
 def get_jhu_data(
         url_prefix = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/',
-        confirmed_file = 'time_series_19-covid-Confirmed.csv',
+        confirmed_file = 'time_series_covid19_confirmed_global.csv',
         recovered_file = 'time_series_19-covid-Recovered.csv',
-        deaths_file = 'time_series_19-covid-Deaths.csv'
+        deaths_file = 'time_series_covid19_deaths_global.csv'
     ):
     "Return confirmed, recovered, deaths according to https://github.com/CSSEGISandData/COVID-19"
     
@@ -23,17 +23,19 @@ def aggregte_jhu_by_state(confirmed, recovered, deaths):
     confirmed = confirmed.drop(['Province/State','Lat','Long'], axis=1).groupby('Country/Region').sum().T
     confirmed.index = pd.DatetimeIndex(confirmed.index, name='Date')
     
-    recovered = recovered.drop(['Province/State','Lat','Long'], axis=1).groupby('Country/Region').sum().T
-    recovered.index = pd.DatetimeIndex(recovered.index, name='Date')
+    #recovered = recovered.drop(['Province/State','Lat','Long'], axis=1).groupby('Country/Region').sum().T
+    #recovered.index = pd.DatetimeIndex(recovered.index, name='Date')
     
     deaths = deaths.drop(['Province/State','Lat','Long'], axis=1).groupby('Country/Region').sum().T
     deaths.index = pd.DatetimeIndex(deaths.index, name='Date')
     
-    infected = (confirmed - recovered - deaths)
+    #infected = (confirmed - recovered - deaths)
+    # previous infection based on reports have a correlation coefficient of 0.998 with this estimate
+    infected = confirmed.diff().rolling('21d', min_periods=0).sum()
     infection_rate = (infected / infected.shift(1))
     
     return pd.concat({
-        'confirmed': confirmed, 'recovered': recovered, 'deaths': deaths, 'infected': infected, 'infection_rate': infection_rate
+        'confirmed': confirmed, 'deaths': deaths, 'new_infected_21d': infected, 'new_infection_rate_21d': infection_rate
     }, axis=1)
 
 
