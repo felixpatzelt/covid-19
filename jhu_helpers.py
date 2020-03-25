@@ -29,13 +29,9 @@ def aggregte_jhu_by_state(confirmed, recovered, deaths):
     deaths = deaths.drop(['Province/State','Lat','Long'], axis=1).groupby('Country/Region').sum().T
     deaths.index = pd.DatetimeIndex(deaths.index, name='Date')
     
-<<<<<<< HEAD
     #infected = (confirmed - recovered - deaths)
     # previous infection based on reports have a correlation coefficient of 0.998 with this estimate
     infected = confirmed.diff().rolling('21d', min_periods=0).sum()
-=======
-    infected = (confirmed - recovered - deaths)
->>>>>>> master
     infection_rate = (infected / infected.shift(1))
     
     return pd.concat({
